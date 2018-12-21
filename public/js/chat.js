@@ -15,11 +15,26 @@ function scrollToBottom () {
 }
 
 socket.on('connect', function () {
-    console.log('Connected to server');
+    var params = jQuery.deparam(window.location.search);
+
+    socket.emit('join', params, function(err) {
+        if(err) {
+            alert(err);
+            window.location.href = '/';
+        } else {
+            console.log('Joined room ' + params.room);
+        }
+    });
 });
 
 socket.on('disconnect', function () { 
     console.log('Disconnected from server');
+});
+
+socket.on('updateUserList', function (users) {
+    var template = jQuery('#user-list-template').html();
+    var html = Mustache.render(template, { userNames: users });
+    jQuery('#users').html(html);
 });
 
 socket.on('newMessage', function (message) {
