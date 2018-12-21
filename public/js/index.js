@@ -1,5 +1,19 @@
 var socket = io();
 
+function scrollToBottom () {
+    var messages = jQuery('#messages');
+    var newMessage = messages.children('li:last-child');
+    var clientHeight = messages.prop('clientHeight');
+    var scrollTop = messages.prop('scrollTop');
+    var scrollHeight = messages.prop('scrollHeight');
+    var newMessageHeight = newMessage.innerHeight();
+    var lastMessageHeight = newMessage.prev().innerHeight();
+
+    if(scrollTop + clientHeight + newMessageHeight + lastMessageHeight >= scrollHeight){
+        messages.scrollTop(scrollHeight - clientHeight);
+    }
+}
+
 socket.on('connect', function () {
     console.log('Connected to server');
 });
@@ -13,7 +27,7 @@ socket.on('newMessage', function (message) {
     var formattedTime = moment(message.createdAt).format("h:mm a");
     var html = Mustache.render(template, { text: message.text, formattedTime: formattedTime, from: message.from });
     jQuery('#messages').append(html);
-
+    scrollToBottom();
 });
 
 socket.on('newLocationMessage', function (message) {
@@ -21,22 +35,25 @@ socket.on('newLocationMessage', function (message) {
     var formattedTime = moment(message.createdAt).format("h:mm a");
     var html = Mustache.render(template, { url: message.url, from: message.from, formattedTime: formattedTime });
     jQuery('#messages').append(html);
+    scrollToBottom();
 });
 
 jQuery('#message-form').on('submit', function(e) {
     e.preventDefault();
     var messageTextbox = jQuery('[name=message]');
 
-    socket.emit(
-      "createMessage",
-      {
-        from: "User",
-        text: messageTextbox.val()
-      },
-      function() {
-        messageTextbox.val("");
-      }
-    );
+    if(messageTextbox.val().length > 1){
+        socket.emit(
+            "createMessage",
+            {
+                from: "User",
+                text: messageTextbox.val()
+            },
+            function () {
+                messageTextbox.val("");
+            }
+        );
+    }
 });
 
 var locationButton = jQuery('#send-location');
