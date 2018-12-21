@@ -22,8 +22,14 @@ io.on('connection', (socket) => {
 
     socket.on('join', (params, callback) => {
         params.room = params.room.toLowerCase();
+
         if(!isRealString(params.name) || !isRealString(params.room)){
             return callback('Name and room are required');
+        
+        }
+
+        if(users.userNameTakenInRoom(params.name, params.room)){
+            return callback(`User name ${params.name} is taken in ${params.room}`);
         }
 
         socket.join(params.room);

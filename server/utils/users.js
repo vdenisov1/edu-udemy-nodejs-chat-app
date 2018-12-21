@@ -34,6 +34,17 @@ class Users {
         let namesArray = usersInRoom.map((user) => user.name);
         return namesArray;
     }
+
+    userNameTakenInRoom (name, room) {
+        let userNames = this.getUserList(room);
+
+        for (let userName of userNames) {
+            if (userName.toLowerCase() === name.toLowerCase())
+                return true;
+        }
+
+        return false;
+    }
 }
 
 module.exports = { Users };
